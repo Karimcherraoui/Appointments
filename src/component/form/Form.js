@@ -4,11 +4,15 @@ import List from "./List";
 import Search from "./Search";
 import axios from "axios";
 
-
+// const dataContext = createContext();
 export default function Form() {
 
     const [state, setState] = useState(false)
     const [data, setData] = useState([])
+    const [query,setQuery] = useState("")
+    const [sortingOption, setSortingOption] = useState("ascending");
+
+
 
 
     const [formData, setFormData] = useState({
@@ -60,7 +64,8 @@ export default function Form() {
             })
     }, []);
 
-    const dataContext = createContext(null)
+
+
 
     return (
         <>
@@ -133,11 +138,25 @@ export default function Form() {
             </div>
         </div>
 
-            <Search />
-            {data.map((item,index)=>(
-            <List key = {item.id} item = {item}  onDelete={onDelete}/>
+            <Search onSearch={(input) => setQuery(input)} setSortingOption={setSortingOption} />
 
-            ))}
+            {data
+                .filter((item) =>
+                    item.petName.toLowerCase().includes(query.toLowerCase()) ||
+                    item.ownerName.toLowerCase().includes(query.toLowerCase())
+                )
+                .sort((a, b) => {
+                    if (sortingOption === "ownerName") return a.ownerName.localeCompare(b.ownerName);
+                    if(sortingOption === "petName") return a.petName.localeCompare(b.petName);
+                    if(sortingOption === "ascending") return b.aptDate.localeCompare(a.aptDate);
+                    if(sortingOption === "descending") return a.aptDate.localeCompare(b.aptDate);
+
+                    return 0;
+                })
+                .map((item, index) => (
+                    <List key={item.id} item={item} onDelete={onDelete} />
+                ))}
+
         </>
     )
 }
